@@ -1,0 +1,50 @@
+# ---------------------------------------------------------------
+# Runs the full application locally with one command:
+#     docker compose up --build
+# Then open http://localhost:3000
+#
+# - "db"  : MySQL 8, playing the role of Amazon RDS
+# - "app" : the Node.js application (attachments saved on disk,
+#           because S3_BUCKET is empty)
+# ---------------------------------------------------------------
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root-password-local-only
+      MYSQL_DATABASE: taskdb
+      MYSQL_USER: taskapp
+      MYSQL_PASSWORD: taskapp-password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: local-development-secret-change-in-production
+      COOKIE_SECURE: "false"
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: taskapp
+      DB_PASSWORD: taskapp-password
+      DB_NAME: taskdb
+      S3_BUCKET: ""
+      CLOUDWATCH_METRICS: "false"
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  db-data:
+  uploads:

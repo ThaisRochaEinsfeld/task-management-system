@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!--
+  index.html - Login and registration page.
+  After a successful login the user is sent to app.html.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Management System</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+  <main class="auth-card">
+    <h1>Task Management System</h1>
+    <p class="muted">Organize your tasks and keep track of what is pending.</p>
+
+    <!-- Tabs to switch between the two forms -->
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" data-form="login-form" role="tab">Log in</button>
+      <button type="button" class="tab" data-form="register-form" role="tab">Create account</button>
+    </div>
+
+    <!-- Login form -->
+    <form id="login-form" class="form">
+      <label for="login-email">Email</label>
+      <input id="login-email" name="email" type="email" autocomplete="email" required>
+
+      <label for="login-password">Password</label>
+      <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+
+      <button type="submit" class="btn primary">Log in</button>
+    </form>
+
+    <!-- Registration form (hidden until its tab is selected) -->
+    <form id="register-form" class="form" hidden>
+      <label for="register-name">Name</label>
+      <input id="register-name" name="name" type="text" autocomplete="name" maxlength="100" required>
+
+      <label for="register-email">Email</label>
+      <input id="register-email" name="email" type="email" autocomplete="email" required>
+
+      <label for="register-password">Password <span class="muted">(at least 8 characters)</span></label>
+      <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+
+      <button type="submit" class="btn primary">Create account</button>
+    </form>
+
+    <p id="message" class="message" role="alert" hidden></p>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

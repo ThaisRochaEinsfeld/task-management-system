@@ -1,0 +1,188 @@
+/* ---------------------------------------------------------------
+   style.css - Styles for the Task Management System
+   Simple, neutral look; works on desktop and mobile.
+   --------------------------------------------------------------- */
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #656d76;
+  --border: #d9dde3;
+  --primary: #2b4a8b;
+  --primary-hover: #213a6e;
+  --success: #1a7f37;
+  --danger: #b42318;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; }
+
+/* Elements with the "hidden" attribute must stay hidden even when a
+   class below gives them display: grid/flex. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2 { margin: 0 0 12px; line-height: 1.25; }
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.1rem; }
+.muted { color: var(--muted); }
+
+/* ----- Buttons and inputs ----- */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.btn:hover { background: var(--bg); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.danger { color: var(--danger); }
+.btn.small { padding: 4px 10px; font-size: 0.85rem; }
+.btn:disabled { opacity: 0.6; cursor: wait; }
+.link-btn { border: 0; background: none; color: var(--danger); cursor: pointer; font: inherit; font-size: 0.85rem; padding: 0; }
+
+input, textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font: inherit;
+  background: var(--surface);
+  color: var(--text);
+}
+input:focus, textarea:focus, .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* ----- Messages ----- */
+.message {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: #fde8e6;
+  color: var(--danger);
+}
+.message.success { background: #e3f4ea; color: var(--success); }
+
+/* ----- Login page ----- */
+.auth-page { display: grid; place-items: center; min-height: 100vh; padding: 16px; }
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+.tabs { display: flex; gap: 4px; margin: 20px 0 16px; border-bottom: 1px solid var(--border); }
+.tab { border: 0; background: none; padding: 8px 12px; font: inherit; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.form { display: grid; gap: 6px; }
+.form button { margin-top: 10px; }
+
+/* ----- Top bar ----- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.brand { font-weight: 700; color: var(--primary); }
+.user { display: flex; align-items: center; gap: 12px; }
+
+.container { max-width: 860px; margin: 0 auto; padding: 20px 16px 48px; display: grid; gap: 20px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+
+/* ----- Dashboard ----- */
+.dashboard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.stat, .progress {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+.stat strong { font-size: 1.6rem; }
+.stat span { color: var(--muted); font-size: 0.85rem; }
+.stat.warn strong { color: var(--danger); }
+
+/* Progress ring: a conic-gradient filled up to --p percent */
+.ring {
+  --p: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary) calc(var(--p) * 1%), var(--border) 0);
+  display: grid;
+  place-items: center;
+}
+.ring span {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* ----- New task form ----- */
+.task-form { display: grid; grid-template-columns: 1fr 170px; gap: 10px; }
+.task-form textarea { grid-column: 1 / -1; }
+.task-form button { grid-column: 1 / -1; justify-self: start; }
+
+/* ----- Task list ----- */
+.list-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.filters { display: flex; gap: 4px; }
+.filter { border: 1px solid var(--border); background: var(--surface); padding: 4px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.85rem; }
+.filter.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.task-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.task {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.task-done { width: 18px; height: 18px; margin-top: 3px; cursor: pointer; }
+.task-body { min-width: 0; }
+.task-title { font-weight: 600; overflow-wrap: anywhere; }
+.task.done .task-title { text-decoration: line-through; color: var(--muted); }
+.task-meta { font-size: 0.85rem; color: var(--muted); }
+.task-meta.overdue { color: var(--danger); font-weight: 600; }
+.task-description { font-size: 0.9rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.attachments { list-style: none; margin: 4px 0 0; padding: 0; font-size: 0.85rem; }
+.attachments a { color: var(--primary); }
+.task-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.edit-form { display: grid; gap: 8px; margin-top: 8px; }
+.row { display: flex; gap: 8px; }
+.empty { text-align: center; padding: 16px 0 0; }
+
+/* ----- Mobile ----- */
+@media (max-width: 640px) {
+  .dashboard { grid-template-columns: repeat(2, 1fr); }
+  .progress { grid-column: 1 / -1; }
+  .task-form { grid-template-columns: 1fr; }
+  .task { grid-template-columns: auto 1fr; }
+  .task-actions { grid-column: 2; justify-content: flex-start; }
+}
