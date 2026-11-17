@@ -19,7 +19,7 @@
 set -euxo pipefail
 
 # ====== EDIT THESE VALUES BEFORE LAUNCHING ======================
-REPO_URL="https://github.com/YOUR-USER/task-management-system.git"
+REPO_URL="https://github.com/ThaisRochaEinsfeld/task-management-system.git"
 DB_HOST="your-rds-endpoint.xxxxxxxx.us-east-1.rds.amazonaws.com"
 DB_USER="admin"
 DB_PASSWORD="CHANGE-ME"
