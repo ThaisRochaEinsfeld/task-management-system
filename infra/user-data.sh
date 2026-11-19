@@ -33,14 +33,14 @@ APP_DIR=/opt/task-management-system
 
 # 1. Packages
 dnf install -y nodejs20 nodejs20-npm git httpd amazon-cloudwatch-agent
-# Make "node" and "npm" point to version 20.
-alternatives --set node /usr/bin/node-20 || true
-ln -sf /usr/bin/npm-20 /usr/bin/npm || true
+# Find the Node.js 20 binaries (they may be installed as node-20 / npm-20).
+NODE_BIN=$(command -v node || command -v node-20)
+NPM_BIN=$(command -v npm || command -v npm-20)
 
 # 2. Application code
 git clone "$REPO_URL" "$APP_DIR"
 cd "$APP_DIR"
-npm ci --omit=dev
+"$NPM_BIN" ci --omit=dev
 
 # 3. Configuration (.env readable only by the app user)
 JWT_SECRET=$(openssl rand -hex 32)
@@ -75,7 +75,7 @@ Wants=network-online.target
 [Service]
 User=taskapp
 WorkingDirectory=$APP_DIR
-ExecStart=/usr/bin/node src/server.js
+ExecStart=$NODE_BIN src/server.js
 Restart=always
 RestartSec=5
 
