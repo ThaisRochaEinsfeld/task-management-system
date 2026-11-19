@@ -18,13 +18,10 @@ Case study of **Trending Information Technologies** (Unisinos, 2026/2), Grau B.
 
 ```
  User browser
-     │ HTTPS
+     │ HTTPS :443  (https://<elastic-ip>.sslip.io, Let's Encrypt certificate)
      ▼
- Amazon CloudFront ──── HTTPS for users, HTTP to the origin
-     │ HTTP :80
-     ▼
- Amazon EC2 (public subnet)
-   Apache (reverse proxy :80) ─► Node.js / Express app (:3000)
+ Amazon EC2 (public subnet, Elastic IP)
+   Apache (HTTPS :443, HTTP :80 redirects) ─► Node.js / Express app (:3000)
      │                 │                    │
      │ MySQL :3306     │ HTTPS (IAM role)   │ logs + metrics
      ▼                 ▼                    ▼
@@ -38,7 +35,7 @@ Case study of **Trending Information Technologies** (Unisinos, 2026/2), Grau B.
 | **Amazon RDS (MySQL)** | Stores users, tasks and attachment metadata. Not publicly accessible. |
 | **Amazon S3** | Stores attached files in a private, encrypted bucket. Downloads use pre-signed URLs valid for 5 minutes. |
 | **Amazon CloudWatch** | Receives application and Apache logs, memory/disk metrics, custom metrics (`TasksCreated`, `TasksCompleted`, `AttachmentsUploaded`, `ServerErrors`) and alarms. |
-| **Amazon CloudFront** | Gives the application an HTTPS address without buying a domain. |
+| **Elastic IP** | Fixed public address for the EC2 instance, so the HTTPS domain and certificate stay valid after restarts. |
 | **IAM (LabRole)** | Lets the EC2 instance use S3 and CloudWatch without access keys in the code. |
 
 ## Project structure
@@ -95,7 +92,7 @@ Use region **us-east-1**. Do the steps in this order.
 
 | Name | Inbound rules |
 |---|---|
-| `tms-web-sg` | HTTP 80 from `0.0.0.0/0` (CloudFront). SSH 22 **only from your IP** (`My IP`), or no SSH at all if you use Session Manager. |
+| `tms-web-sg` | HTTP 80 and HTTPS 443 from `0.0.0.0/0`. SSH 22 **only from your IP** (`My IP`), or no SSH at all if you use Session Manager. |
 | `tms-db-sg` | MySQL/Aurora 3306 **only from `tms-web-sg`**. |
 
 ### 2. Amazon RDS
@@ -120,17 +117,25 @@ Use region **us-east-1**. Do the steps in this order.
    - User data: paste `infra/user-data.sh` after editing the values at its top (repository URL, RDS endpoint and password, bucket name).
 4. After a few minutes, open `http://<EC2 public IP>`. Installation logs are in `/var/log/cloud-init-output.log`.
 
-### 5. Amazon CloudFront (HTTPS)
+### 5. HTTPS (Elastic IP + Let's Encrypt)
 
-Create a distribution with these settings:
+The AWS Academy Learner Lab does not allow creating Amazon CloudFront distributions
+(`cloudfront:CreateDistribution` is denied), so HTTPS is served directly by Apache
+with a free [Let's Encrypt](https://letsencrypt.org/) certificate.
 
-- **Origin:** the EC2 *Public IPv4 DNS*, protocol HTTP only, port 80.
-- **Viewer protocol policy:** Redirect HTTP to HTTPS.
-- **Allowed HTTP methods:** GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE.
-- **Cache policy:** `CachingDisabled`. The app is dynamic and uses login cookies.
-- **Origin request policy:** `AllViewer`.
+1. **EC2 > Elastic IPs > Allocate**, then **Associate** it with the instance.
+   The public IP no longer changes when the lab restarts.
+2. In `tms-web-sg`, add an inbound rule **HTTPS 443** from `0.0.0.0/0`.
+3. Connect to the instance and run:
 
-Open the `https://xxxx.cloudfront.net` address. Because `COOKIE_SECURE=true`, users must use this HTTPS address.
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/ThaisRochaEinsfeld/task-management-system/main/infra/enable-https.sh -o enable-https.sh
+   sudo bash enable-https.sh
+   ```
+
+   The script creates the domain `<ip-with-dashes>.sslip.io` (for example
+   `3-228-214-70.sslip.io`), requests the certificate, configures Apache
+   (HTTP → HTTPS redirect) and sets `COOKIE_SECURE=true`.
 
 ### 6. Amazon CloudWatch
 
@@ -161,7 +166,7 @@ fields time, level, message, path, status
 | sort time desc
 ```
 
-> **Learner Lab note:** the lab session stops after a few hours and the EC2 instance stops with it. Start the lab again before the presentation. After a restart the public IP changes, so update the CloudFront origin. Or just use docker compose for a quick local demo.
+> **Learner Lab note:** the lab session stops after a few hours and the EC2 instance stops with it. Start the lab again before the presentation. With the Elastic IP the address stays the same. For a quick local demo, use docker compose.
 
 ## Security measures (Grau A → Grau B)
 
@@ -170,7 +175,7 @@ These measures answer the risks we identified in the *Misconfiguration & Inadequ
 | Risk seen in Grau A | What we did in Grau B |
 |---|---|
 | SSH 22 open to `0.0.0.0/0` | SSH allowed only from the group's IP (or Session Manager) |
-| Plain HTTP | HTTPS through CloudFront and a `Secure` cookie |
+| Plain HTTP | HTTPS with a Let's Encrypt certificate, HTTP redirected to HTTPS, `Secure` cookie |
 | Database exposure | RDS in a private subnet that accepts only the web security group |
 | Credentials in code | IAM role (LabInstanceProfile) for S3/CloudWatch. `.env` has mode 600 and is never committed |
 | Passwords | bcrypt hashes, login rate limit (20 attempts / 15 min), generic error messages |

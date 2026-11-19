@@ -26,7 +26,7 @@ DB_PASSWORD="CHANGE-ME"
 DB_NAME="taskdb"
 S3_BUCKET="task-management-system-attachments-CHANGE-ME"
 AWS_REGION="us-east-1"
-COOKIE_SECURE="true"   # true when users access through CloudFront (HTTPS)
+COOKIE_SECURE="false"  # enable-https.sh switches it to true after HTTPS is set up
 # ================================================================
 
 APP_DIR=/opt/task-management-system

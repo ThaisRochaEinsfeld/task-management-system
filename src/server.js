@@ -25,7 +25,7 @@ const taskRoutes = require('./routes/tasks');
 
 const app = express();
 
-// Behind CloudFront the real client IP arrives in X-Forwarded-For.
+// Behind Apache (reverse proxy) the real client IP arrives in X-Forwarded-For.
 // Trusting one proxy hop makes req.ip (used by the rate limiter) correct.
 app.set('trust proxy', 1);
 
@@ -37,7 +37,7 @@ app.set('trust proxy', 1);
 // X-Content-Type-Options, X-Frame-Options, etc.).
 app.use(helmet({
   // The pages are served over HTTP during local tests, so we do not
-  // force the browser to upgrade requests to HTTPS here; CloudFront
+  // force the browser to upgrade requests to HTTPS here; Apache
   // takes care of HTTPS in production.
   contentSecurityPolicy: {
     directives: { upgradeInsecureRequests: null },
@@ -65,7 +65,7 @@ app.use('/api', (req, res, next) => {
 // Routes
 // ---------------------------------------------------------------
 
-// Health check used by monitoring (and CloudFront/ALB if added later).
+// Health check used by monitoring.
 // It also checks that the database answers.
 app.get('/health', async (req, res) => {
   try {
